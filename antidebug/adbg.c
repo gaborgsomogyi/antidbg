@@ -45,7 +45,9 @@ DebugCheckResult debuggerChecks[] = {
 #define NUM_DEBUG_CHECKS (sizeof(debuggerChecks) / sizeof(debuggerChecks[0]))
 
 static bool g_activeChecks[NUM_DEBUG_CHECKS];
+#ifdef _DEBUG
 bool g_dryRun = false;
+#endif
 
 static void init_active_checks(void) {
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)
@@ -53,9 +55,15 @@ static void init_active_checks(void) {
 }
 
 static void print_usage(void) {
+#ifdef _DEBUG
     printf("Usage: antidbg [-h] [-d] [-p <spec>]\n\n");
+#else
+    printf("Usage: antidbg [-h] [-p <spec>]\n\n");
+#endif
     printf("  -h          Show this help and exit\n");
+#ifdef _DEBUG
     printf("  -d          Dry run: log detections but do not terminate\n");
+#endif
     printf("  -p <spec>   Run only the specified checks (default: all %d active)\n\n", (int)NUM_DEBUG_CHECKS);
     printf("  <spec> format: comma-separated indices and/or inclusive ranges\n");
     printf("    Examples:\n");
@@ -147,8 +155,10 @@ DWORD __stdcall __adbg(LPVOID lpParam) {
             }
 
             if (debuggerChecks[i].result) {
+#ifdef _DEBUG
                 printf("[!] Debugger detected in function: %s\n", debuggerChecks[i].functionName);
                 if (!g_dryRun)
+#endif
                     __fastfail(EXIT_SUCCESS);
             }
 
@@ -210,7 +220,11 @@ void StartDebugProtection() {
     StartAttachProtection();
     const HANDLE hProcess = (HANDLE)(-1LL);
     DbgCreateThread((HANDLE)(-1LL), 0, __adbg, (LPVOID)hProcess, 0, ((void*)0), ((void*)0));
+#ifdef _DEBUG
     StartMemoryTracker(hProcess, g_dryRun);
+#else
+    StartMemoryTracker(hProcess);
+#endif
 }
 
 bool isProgramBeingDebugged() {
@@ -254,10 +268,12 @@ int main(int argc, char* argv[]) {
             print_usage();
             return 0;
         }
+#ifdef _DEBUG
         if (strcmp(argv[i], "-d") == 0) {
             g_dryRun = true;
             continue;
         }
+#endif
         if (strcmp(argv[i], "-p") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[-] -p requires an argument\n");
@@ -272,8 +288,10 @@ int main(int argc, char* argv[]) {
         }
     }
 
+#ifdef _DEBUG
     if (g_dryRun)
         printf("[*] Dry run mode: detections will be logged but process will not terminate\n");
+#endif
     printf("[*] Active checks:\n");
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i) {
         if (g_activeChecks[i])
