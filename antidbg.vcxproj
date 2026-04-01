@@ -75,6 +75,7 @@
     <ClInclude Include="antidebug\asm\sckreg.h" />
     <ClInclude Include="antidebug\core\atcptr.h" />
     <ClInclude Include="antidebug\core\handler.h" />
+    <ClInclude Include="antidebug\core\config.h" />
     <ClInclude Include="antidebug\core\hasher.h" />
     <ClInclude Include="antidebug\core\nttypes.h" />
     <ClInclude Include="antidebug\core\syscall.h" />

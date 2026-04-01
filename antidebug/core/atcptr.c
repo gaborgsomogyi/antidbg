@@ -1,5 +1,6 @@
 #include "atcptr.h"
 #include "syscall.h"
+#include "config.h"
 
 static void __stdcall AntiAttach(void);
 void __stdcall clb(PVOID DllHandle, DWORD reason, PVOID Reserved);
@@ -85,7 +86,9 @@ void __stdcall clb(PVOID DllHandle, DWORD reason, PVOID Reserved)
                 {
                     if (pThreadInfo[i].StartAddress == pDbgUiRemoteBreakin)
                     {
-                        __fastfail(STATUS_ACCESS_VIOLATION);
+                        printf("[!] DbgUiRemoteBreakin thread detected\n");
+                        if (!g_dryRun)
+                            __fastfail(STATUS_ACCESS_VIOLATION);
                     }
                     break;
                 }
@@ -102,7 +105,9 @@ void __stdcall clb(PVOID DllHandle, DWORD reason, PVOID Reserved)
 
 static void __stdcall AntiAttach(void)
 {
-    __fastfail(FAST_FAIL_FATAL_APP_EXIT);
+    printf("[!] Debugger attach attempt detected (DbgUiRemoteBreakin)\n");
+    if (!g_dryRun)
+        __fastfail(FAST_FAIL_FATAL_APP_EXIT);
 }
 
 // not directly syscalled because we don't really care too much, we will be checking debug registers at random times during all the program's lifecycle with direct kernel calls
