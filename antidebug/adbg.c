@@ -45,6 +45,7 @@ DebugCheckResult debuggerChecks[] = {
 #define NUM_DEBUG_CHECKS (sizeof(debuggerChecks) / sizeof(debuggerChecks[0]))
 
 static bool g_activeChecks[NUM_DEBUG_CHECKS];
+static bool g_dryRun = false;
 
 static void init_active_checks(void) {
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)
@@ -52,8 +53,9 @@ static void init_active_checks(void) {
 }
 
 static void print_usage(void) {
-    printf("Usage: antidbg [-h] [-p <spec>]\n\n");
+    printf("Usage: antidbg [-h] [-d] [-p <spec>]\n\n");
     printf("  -h          Show this help and exit\n");
+    printf("  -d          Dry run: log detections but do not terminate\n");
     printf("  -p <spec>   Run only the specified checks (default: all %d active)\n\n", (int)NUM_DEBUG_CHECKS);
     printf("  <spec> format: comma-separated indices and/or inclusive ranges\n");
     printf("    Examples:\n");
@@ -145,10 +147,9 @@ DWORD __stdcall __adbg(LPVOID lpParam) {
             }
 
             if (debuggerChecks[i].result) {
-            #ifdef _DEBUG
                 printf("[!] Debugger detected in function: %s\n", debuggerChecks[i].functionName);
-            #endif
-                __fastfail(EXIT_SUCCESS);
+                if (!g_dryRun)
+                    __fastfail(EXIT_SUCCESS);
             }
 
             // ensure our thread priority was not tampered with
@@ -253,6 +254,10 @@ int main(int argc, char* argv[]) {
             print_usage();
             return 0;
         }
+        if (strcmp(argv[i], "-d") == 0) {
+            g_dryRun = true;
+            continue;
+        }
         if (strcmp(argv[i], "-p") == 0) {
             if (i + 1 >= argc) {
                 fprintf(stderr, "[-] -p requires an argument\n");
@@ -267,6 +272,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    if (g_dryRun)
+        printf("[*] Dry run mode: detections will be logged but process will not terminate\n");
     printf("[*] Active checks:\n");
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i) {
         if (g_activeChecks[i])
