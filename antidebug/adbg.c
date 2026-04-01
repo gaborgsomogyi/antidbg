@@ -153,7 +153,7 @@ DWORD __stdcall __adbg(LPVOID lpParam) {
 
             if (debuggerChecks[i].result) {
 #ifdef _DEBUG
-                printf("[!] Debugger detected in function: %s\n", debuggerChecks[i].functionName);
+                dbg_log("[!] Debugger detected in function: %s\n", debuggerChecks[i].functionName);
                 if (!g_dryRun)
 #endif
                     __fastfail(EXIT_SUCCESS);
@@ -163,14 +163,14 @@ DWORD __stdcall __adbg(LPVOID lpParam) {
             const int currentPriority = GetThreadPriority(hThread);
             if (currentPriority == THREAD_PRIORITY_ERROR_RETURN) {
             #ifdef _DEBUG
-                printf("[-] Failed to query thread priority. Error: %d\n", GetLastError());
+                dbg_log("[-] Failed to query thread priority. Error: %d\n", GetLastError());
             #endif
             }
 
             if (currentPriority != THREAD_PRIORITY_NORMAL) {
                 if (!SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL)) {
                 #ifdef _DEBUG
-                    printf("[-] Failed to set thread priority. Error: %d\n", GetLastError());
+                    dbg_log("[-] Failed to set thread priority. Error: %d\n", GetLastError());
                 #endif
                 }
             }
@@ -283,9 +283,9 @@ int main(int argc, char* argv[]) {
 
 #ifdef _DEBUG
     if (g_dryRun)
-        printf("[*] Dry run mode: detections will be logged but process will not terminate\n");
+        dbg_log("[*] Dry run mode: detections will be logged but process will not terminate\n");
 #endif
-    printf("[*] Active checks:\n");
+    dbg_log("[*] Active checks:\n");
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i) {
         if (g_activeChecks[i])
             printf("    %2d  %s\n", i, debuggerChecks[i].functionName);

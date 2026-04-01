@@ -1,6 +1,7 @@
 #include "hasher.h"
 #include "syscall.h"
 #include "config.h"
+#include "log.h"
 
 static inline BOOL GetTextSectionInfo(HMODULE hMod, DWORD* rva, DWORD* size)
 {
@@ -112,7 +113,7 @@ void StartMemoryTracker(const HANDLE hProcess)
             modCrcs[i].originalCrc = Crc32_Section(mods[i], rva, size, hProcess);
 
         #ifdef _DEBUG
-            printf("[*] Module[%u]=%p  CRC=0x%08X\n", i, mods[i], modCrcs[i].originalCrc);
+            dbg_log("[*] Module[%u]=%p  CRC=0x%08X\n", i, mods[i], modCrcs[i].originalCrc);
         #endif
         }
     }
@@ -168,11 +169,11 @@ void StartMemoryTracker(const HANDLE hProcess)
 #ifdef _DEBUG
                 wchar_t name[MAX_PATH];
                 if (GetModuleFileNameW(modCrcs[i].hMod, name, _countof(name)))
-                    fwprintf(stderr, L"[!] Module tampered: %s\n", name);
+                    dbg_log("[!] Module tampered: %S\n", name);
                 else
-                    fprintf(stderr, "[!] Module at %p tampered\n", modCrcs[i].hMod);
+                    dbg_log("[!] Module at %p tampered\n", modCrcs[i].hMod);
 
-                fprintf(stderr, "    original CRC=0x%08X  new CRC=0x%08X\n",
+                dbg_log("    original CRC=0x%08X  new CRC=0x%08X\n",
                     modCrcs[i].originalCrc, crc);
 
                 if (!g_dryRun)
@@ -195,7 +196,7 @@ void StartMemoryTracker(const HANDLE hProcess)
         // same as STATUS_SUCCESS, WAIT_OBJECT_0 on WaitForSingleObject
         if (status == STATUS_WAIT_0) { // ((((DWORD)0x00000000L)) + 0)
 #ifdef _DEBUG
-            fprintf(stderr, "[!] Time slip event fired\n");
+            dbg_log("[!] Time slip event fired\n");
             if (!g_dryRun)
 #endif
             {

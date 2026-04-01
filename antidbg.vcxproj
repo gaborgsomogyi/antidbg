@@ -28,6 +28,7 @@
     <ClCompile Include="antidebug\asm\sckreg.c" />
     <ClCompile Include="antidebug\core\atcptr.c" />
     <ClCompile Include="antidebug\core\config.c" />
+    <ClCompile Include="antidebug\core\log.c" />
     <ClCompile Include="antidebug\core\handler.c" />
     <ClCompile Include="antidebug\core\hasher.c" />
     <ClCompile Include="antidebug\core\syscall.c" />
@@ -77,6 +78,7 @@
     <ClInclude Include="antidebug\core\atcptr.h" />
     <ClInclude Include="antidebug\core\handler.h" />
     <ClInclude Include="antidebug\core\config.h" />
+    <ClInclude Include="antidebug\core\log.h" />
     <ClInclude Include="antidebug\core\hasher.h" />
     <ClInclude Include="antidebug\core\nttypes.h" />
     <ClInclude Include="antidebug\core\syscall.h" />

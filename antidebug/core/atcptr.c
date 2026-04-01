@@ -1,6 +1,7 @@
 #include "atcptr.h"
 #include "syscall.h"
 #include "config.h"
+#include "log.h"
 
 static void __stdcall AntiAttach(void);
 void __stdcall clb(PVOID DllHandle, DWORD reason, PVOID Reserved);
@@ -87,7 +88,7 @@ void __stdcall clb(PVOID DllHandle, DWORD reason, PVOID Reserved)
                     if (pThreadInfo[i].StartAddress == pDbgUiRemoteBreakin)
                     {
 #ifdef _DEBUG
-                        printf("[!] DbgUiRemoteBreakin thread detected\n");
+                        dbg_log("[!] DbgUiRemoteBreakin thread detected\n");
                         if (!g_dryRun)
 #endif
                             __fastfail(STATUS_ACCESS_VIOLATION);
@@ -108,7 +109,7 @@ void __stdcall clb(PVOID DllHandle, DWORD reason, PVOID Reserved)
 static void __stdcall AntiAttach(void)
 {
 #ifdef _DEBUG
-    printf("[!] Debugger attach attempt detected (DbgUiRemoteBreakin)\n");
+    dbg_log("[!] Debugger attach attempt detected (DbgUiRemoteBreakin)\n");
     if (!g_dryRun)
 #endif
         __fastfail(FAST_FAIL_FATAL_APP_EXIT);

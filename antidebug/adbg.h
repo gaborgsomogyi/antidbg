@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "core\config.h"
+#include "core\log.h"
 #include "core\thrmng.h"
 #include "core\atcptr.h"
 #include "core\hasher.h"

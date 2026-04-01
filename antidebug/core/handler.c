@@ -1,6 +1,6 @@
 #include "handler.h"
 #include "config.h"
-#include <stdio.h>
+#include "log.h"
 
 LONG CALLBACK VectoredDebuggerCheck(PEXCEPTION_POINTERS pExceptionInfo) 
 {
@@ -13,7 +13,7 @@ LONG CALLBACK VectoredDebuggerCheck(PEXCEPTION_POINTERS pExceptionInfo)
         PCONTEXT ctx = pExceptionInfo->ContextRecord;
         if (ctx->Dr0 || ctx->Dr1 || ctx->Dr2 || ctx->Dr3) {
 #ifdef _DEBUG
-            printf("[!] Hardware breakpoint detected via single-step\n");
+            dbg_log("[!] Hardware breakpoint detected via single-step\n");
             if (!g_dryRun)
 #endif
                 __fastfail(STATUS_FATAL_APP_EXIT);
@@ -30,7 +30,7 @@ LONG CALLBACK VectoredDebuggerCheck(PEXCEPTION_POINTERS pExceptionInfo)
         BYTE first = *(BYTE*)pKi;
         if (first == 0xE9) {
 #ifdef _DEBUG
-            printf("[!] KiUserExceptionDispatcher hooked\n");
+            dbg_log("[!] KiUserExceptionDispatcher hooked\n");
             if (!g_dryRun)
 #endif
                 __fastfail(STATUS_CONTROL_STACK_VIOLATION);
