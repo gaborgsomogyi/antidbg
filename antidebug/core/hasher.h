@@ -25,7 +25,7 @@ extern "C" {
         uint32_t originalCrc;
     } ModuleCRC;
 
-	void StartMemoryTracker(const HANDLE hProcess);
+	void StartMemoryTracker(const HANDLE hProcess, bool dryRun);
 
 #ifdef __cplusplus
 }

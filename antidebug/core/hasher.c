@@ -84,7 +84,7 @@ static inline uint32_t Crc32_Section(const HMODULE hMod, const DWORD sectionRVA,
     return (uint32_t)crc;
 }
 
-void StartMemoryTracker(const HANDLE hProcess)
+void StartMemoryTracker(const HANDLE hProcess, bool dryRun)
 {
     HMODULE       mods[1024];
     DWORD         cbNeeded, mCount;
@@ -164,7 +164,6 @@ void StartMemoryTracker(const HANDLE hProcess)
             const uint32_t crc = Crc32_Section(modCrcs[i].hMod, modCrcs[i].textRVA, modCrcs[i].textSize, hProcess);
 
             if (crc != 0 && crc != modCrcs[i].originalCrc) {
-            #ifdef _DEBUG
                 wchar_t name[MAX_PATH];
                 if (GetModuleFileNameW(modCrcs[i].hMod, name, _countof(name)))
                     fwprintf(stderr, L"[!] Module tampered: %s\n", name);
@@ -173,9 +172,11 @@ void StartMemoryTracker(const HANDLE hProcess)
 
                 fprintf(stderr, "    original CRC=0x%08X  new CRC=0x%08X\n",
                     modCrcs[i].originalCrc, crc);
-            #endif
-                free(modCrcs);
-                __fastfail(ERROR_STACK_BUFFER_OVERRUN);
+
+                if (!dryRun) {
+                    free(modCrcs);
+                    __fastfail(ERROR_STACK_BUFFER_OVERRUN);
+                }
             }
         }
 
@@ -189,8 +190,11 @@ void StartMemoryTracker(const HANDLE hProcess)
 
         // same as STATUS_SUCCESS, WAIT_OBJECT_0 on WaitForSingleObject
         if (status == STATUS_WAIT_0) { // ((((DWORD)0x00000000L)) + 0)
-            DbgNtClose(hTimeSlipEvent);
-            __fastfail(STATUS_ACCESS_VIOLATION);
+            fprintf(stderr, "[!] Time slip event fired\n");
+            if (!dryRun) {
+                DbgNtClose(hTimeSlipEvent);
+                __fastfail(STATUS_ACCESS_VIOLATION);
+            }
         }
     }
 }

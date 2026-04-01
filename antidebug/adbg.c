@@ -210,7 +210,7 @@ void StartDebugProtection() {
     StartAttachProtection();
     const HANDLE hProcess = (HANDLE)(-1LL);
     DbgCreateThread((HANDLE)(-1LL), 0, __adbg, (LPVOID)hProcess, 0, ((void*)0), ((void*)0));
-    StartMemoryTracker(hProcess);
+    StartMemoryTracker(hProcess, g_dryRun);
 }
 
 bool isProgramBeingDebugged() {
