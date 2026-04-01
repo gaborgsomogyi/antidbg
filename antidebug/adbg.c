@@ -45,9 +45,6 @@ DebugCheckResult debuggerChecks[] = {
 #define NUM_DEBUG_CHECKS (sizeof(debuggerChecks) / sizeof(debuggerChecks[0]))
 
 static bool g_activeChecks[NUM_DEBUG_CHECKS];
-#ifdef _DEBUG
-bool g_dryRun = false;
-#endif
 
 static void init_active_checks(void) {
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)

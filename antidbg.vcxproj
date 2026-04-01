@@ -27,6 +27,7 @@
     <ClCompile Include="antidebug\asm\prehop.c" />
     <ClCompile Include="antidebug\asm\sckreg.c" />
     <ClCompile Include="antidebug\core\atcptr.c" />
+    <ClCompile Include="antidebug\core\config.c" />
     <ClCompile Include="antidebug\core\handler.c" />
     <ClCompile Include="antidebug\core\hasher.c" />
     <ClCompile Include="antidebug\core\syscall.c" />
