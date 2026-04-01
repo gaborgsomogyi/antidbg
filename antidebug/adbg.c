@@ -267,6 +267,12 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    printf("[*] Active checks:\n");
+    for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i) {
+        if (g_activeChecks[i])
+            printf("    %2d  %s\n", i, debuggerChecks[i].functionName);
+    }
+
     StartDebugProtection();
     return 0;
 }
