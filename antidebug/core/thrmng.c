@@ -1,5 +1,6 @@
 #include "thrmng.h"
 #include "syscall.h"
+#include "config.h"
 
 HANDLE DbgCreateThread(
     const HANDLE hProcess,
@@ -31,7 +32,10 @@ HANDLE DbgCreateThread(
         return NULL;
     }
 
-    DbgNtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, 0);
+#ifdef _DEBUG
+    if (!g_dryRun)
+#endif
+        DbgNtSetInformationThread(hThread, ThreadHideFromDebugger, NULL, 0);
 
     if (lpThreadId)
         *lpThreadId = GetThreadId(hThread);
