@@ -7,49 +7,48 @@ The library is:
 - Directly syscalled, which means that most antidebugging checks can't be hooked from user-space
 - Optimized for officially supported Windows versions and AMD64 only.
 - Designed for speed and minimal memory usage
-- Compatible with any C and C++ standard
+- Requires Visual Studio (MSVC) on Windows x64
 
 ## Features
 **__1.__** Able to bypass thread creation hooking and hide user-land threads from debuggers.
 
-**__2.__** Able to detect debuggers with more than 30 different tricks:
-  - 1: IsBeingDebugged
-  - 2: IsRemoteDebuggerPresent
-  - 3: DebuggerBreak
-  - 4: int2D
-  - 5: int3
-  - 6: StackSegmentRegister
-  - 7: PrefixHop
-  - 8: RaiseDbgControl
-  - 9: DebugObjectHandle
-  - 10: KernelDebugger
-  - 11: NtGlobalFlag
-  - 12: DebugFlags
-  - 13: ProcessHeapFlags
-  - 14: ProcessHeapForceFlag
-  - 15: DuplicatedHandles
-  - 16: PEB (direct memory access without using OS api calls)
-  - 17: ProcessDebugPort
-  - 18: HardwareBreakpoint
-  - 19: HardwareBreakpoint2
-  - 20: MEM_WRITE_WATCH
-  - 21: DebugActiveProcess
+**__2.__** Able to detect debuggers with 36 different checks (indices usable with `-p`):
+  - 0: IsBeingDebugged
+  - 1: IsRemoteDebuggerPresent
+  - 2: DebuggerBreak
+  - 3: int2D
+  - 4: int3
+  - 5: StackSegmentRegister
+  - 6: PrefixHop
+  - 7: RaiseDbgControl
+  - 8: DebugObjectHandle
+  - 9: KernelDebugger
+  - 10: NtGlobalFlag
+  - 11: DebugFlags
+  - 12: ProcessHeap_Flags
+  - 13: ProcessHeapForce_Flag
+  - 14: DuplicatedHandles
+  - 15: ParentProcesses
+  - 16: NtSetLdtEntries
+  - 17: PEB
+  - 18: DebugPort
+  - 19: HardwareBreakpoint
+  - 20: HardwareBreakpoint2
+  - 21: VirtualAlloc_MEM_WRITE_WATCH
   - 22: InvalidHandle
   - 23: NtQueryObject
-  - 24: NtOpenProcess
+  - 24: OpenProcess
   - 25: SetHandleInformation
-  - 26: NtSystemDebugControl_Command
+  - 26: NtSystemDebugControl
   - 27: ReadOwnMemoryStack
   - 28: ProcessJob
   - 29: POPFTrapFlag
-  - 30: MemoryBreakpoint (PAGE_GUARD)
+  - 30: MemoryBreakpoint
   - 31: PageExceptionBreakpoint
-  - 32: Timing attacks
-  - 33: Window analysis
-  - 34: Thread start address
-  - 35: Parent process 
-  - 36: Firmware (ACPI) checks
-  - 37: Kernel debugger checks with LBR/BTF
+  - 32: Timing
+  - 33: Window
+  - 34: DBGP
+  - 35: LBR
 
 **__3.__** Able to detect unusual memory writes by other analysis tools like sandboxes.
 
@@ -100,8 +99,7 @@ int main() {
 ```
 
 # Notes
-The library is fully supported on MSVC, the syscall core for other compilers like MinGW-w64, GCC and Clang is in experimental phase.
-CMake generation is experimental.
+The library requires Visual Studio (MSVC) on Windows x64. Other compilers and build systems are not supported.
 
 # Legal
 I am not responsible nor liable for any damage you cause through any malicious usage of this project.
