@@ -1,5 +1,6 @@
 #include "hasher.h"
 #include "syscall.h"
+#include "config.h"
 
 static inline BOOL GetTextSectionInfo(HMODULE hMod, DWORD* rva, DWORD* size)
 {
@@ -84,11 +85,7 @@ static inline uint32_t Crc32_Section(const HMODULE hMod, const DWORD sectionRVA,
     return (uint32_t)crc;
 }
 
-#ifdef _DEBUG
-void StartMemoryTracker(const HANDLE hProcess, bool dryRun)
-#else
 void StartMemoryTracker(const HANDLE hProcess)
-#endif
 {
     HMODULE       mods[1024];
     DWORD         cbNeeded, mCount;
@@ -178,7 +175,7 @@ void StartMemoryTracker(const HANDLE hProcess)
                 fprintf(stderr, "    original CRC=0x%08X  new CRC=0x%08X\n",
                     modCrcs[i].originalCrc, crc);
 
-                if (!dryRun)
+                if (!g_dryRun)
 #endif
                 {
                     free(modCrcs);
@@ -199,7 +196,7 @@ void StartMemoryTracker(const HANDLE hProcess)
         if (status == STATUS_WAIT_0) { // ((((DWORD)0x00000000L)) + 0)
 #ifdef _DEBUG
             fprintf(stderr, "[!] Time slip event fired\n");
-            if (!dryRun)
+            if (!g_dryRun)
 #endif
             {
                 DbgNtClose(hTimeSlipEvent);
