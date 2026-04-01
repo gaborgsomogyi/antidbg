@@ -1,4 +1,7 @@
 #include "adbg.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 DebugCheckResult debuggerChecks[] = {
     {false, "IsBeingDebugged", .functionPtr = IsBeingDebugged},
@@ -41,6 +44,84 @@ DebugCheckResult debuggerChecks[] = {
 
 #define NUM_DEBUG_CHECKS (sizeof(debuggerChecks) / sizeof(debuggerChecks[0]))
 
+static bool g_activeChecks[NUM_DEBUG_CHECKS];
+
+static void init_active_checks(void) {
+    for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)
+        g_activeChecks[i] = true;
+}
+
+static void print_usage(void) {
+    printf("Usage: antidbg [-h] [-p <spec>]\n\n");
+    printf("  -h          Show this help and exit\n");
+    printf("  -p <spec>   Run only the specified checks (default: all %d active)\n\n", (int)NUM_DEBUG_CHECKS);
+    printf("  <spec> format: comma-separated indices and/or inclusive ranges\n");
+    printf("    Examples:\n");
+    printf("      -p 0,1,2,3     checks 0, 1, 2, 3\n");
+    printf("      -p 0-2,5-6     checks 0, 1, 2, 5, 6\n");
+    printf("      -p 0,2-5,7     checks 0, 2, 3, 4, 5, 7\n\n");
+    printf("  Available checks:\n");
+    for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)
+        printf("    %2d  %s\n", i, debuggerChecks[i].functionName);
+}
+
+static bool parse_protection_spec(const char* spec) {
+    char buf[512];
+    const size_t specLen = strlen(spec);
+    if (specLen == 0 || specLen >= sizeof(buf)) {
+        fprintf(stderr, "[-] Invalid -p spec (empty or too long)\n");
+        return false;
+    }
+    memcpy(buf, spec, specLen + 1);
+
+    // reset all to false; only enable what is specified
+    for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)
+        g_activeChecks[i] = false;
+
+    char* ctx = NULL;
+    char* token = strtok_s(buf, ",", &ctx);
+    while (token != NULL) {
+        char* dash = strchr(token, '-');
+        if (dash != NULL) {
+            // range: start-end
+            *dash = '\0';
+            char* endptr1 = NULL;
+            char* endptr2 = NULL;
+            const long start = strtol(token, &endptr1, 10);
+            const long end   = strtol(dash + 1, &endptr2, 10);
+            if (*endptr1 != '\0' || *endptr2 != '\0') {
+                fprintf(stderr, "[-] Non-numeric value in range '%s-%s'\n", token, dash + 1);
+                return false;
+            }
+            if (start > end) {
+                fprintf(stderr, "[-] Inverted range %ld-%ld\n", start, end);
+                return false;
+            }
+            if (start < 0 || end >= (long)NUM_DEBUG_CHECKS) {
+                fprintf(stderr, "[-] Range %ld-%ld out of bounds (0-%d)\n", start, end, (int)NUM_DEBUG_CHECKS - 1);
+                return false;
+            }
+            for (long i = start; i <= end; ++i)
+                g_activeChecks[i] = true;
+        } else {
+            // single index
+            char* endptr = NULL;
+            const long idx = strtol(token, &endptr, 10);
+            if (*endptr != '\0') {
+                fprintf(stderr, "[-] Non-numeric value '%s'\n", token);
+                return false;
+            }
+            if (idx < 0 || idx >= (long)NUM_DEBUG_CHECKS) {
+                fprintf(stderr, "[-] Index %ld out of bounds (0-%d)\n", idx, (int)NUM_DEBUG_CHECKS - 1);
+                return false;
+            }
+            g_activeChecks[idx] = true;
+        }
+        token = strtok_s(NULL, ",", &ctx);
+    }
+    return true;
+}
+
 
 DWORD __stdcall __adbg(LPVOID lpParam) {
     const HANDLE hProcess = (HANDLE)(lpParam);
@@ -48,6 +129,8 @@ DWORD __stdcall __adbg(LPVOID lpParam) {
 
     while (1) {
         for (int i = 0; i < NUM_DEBUG_CHECKS; ++i) {
+            if (!g_activeChecks[i]) continue;
+
             if (debuggerChecks[i].functionPtrWithProcess != NULL) {
                 debuggerChecks[i].result = debuggerChecks[i].functionPtrWithProcess(hProcess);
             }
@@ -134,6 +217,8 @@ bool isProgramBeingDebugged() {
     const HANDLE hThread = (HANDLE)(-2LL);
 
     for (int i = 0; i < NUM_DEBUG_CHECKS; ++i) {
+        if (!g_activeChecks[i]) continue;
+
         if (debuggerChecks[i].functionPtrWithProcess != NULL) {
             debuggerChecks[i].result = debuggerChecks[i].functionPtrWithProcess(hProcess);
         }
@@ -160,7 +245,28 @@ bool isProgramBeingDebugged() {
     return false;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    init_active_checks();
+
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "-h") == 0) {
+            print_usage();
+            return 0;
+        }
+        if (strcmp(argv[i], "-p") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "[-] -p requires an argument\n");
+                print_usage();
+                return 1;
+            }
+            ++i;
+            if (!parse_protection_spec(argv[i])) {
+                print_usage();
+                return 1;
+            }
+        }
+    }
+
     StartDebugProtection();
     return 0;
 }
