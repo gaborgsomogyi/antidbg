@@ -12,8 +12,8 @@ The library is:
 ## Features
 **__1.__** Able to bypass thread creation hooking and hide user-land threads from debuggers.
 
-**__2.__** Able to detect debuggers with 36 different checks (indices usable with `-p`):
-  - Tab 1 (0–12):
+**__2.__** Able to detect debuggers with 37 different checks (indices usable with `-p`):
+  - Tab 1 (0–13):
     - 0: IsBeingDebugged
     - 1: PEB
     - 2: NtGlobalFlag
@@ -21,38 +21,39 @@ The library is:
     - 4: ProcessHeapForce_Flag
     - 5: IsRemoteDebuggerPresent
     - 6: DebugPort
-    - 7: InvalidHandle
-    - 8: OpenProcess
-    - 9: DebugFlags
-    - 10: DebugObjectHandle
-    - 11: NtQueryObject
-    - 12: Window
-  - Tab 2 (13–18):
-    - 13: ParentProcesses
-    - 14: Timing
-    - 15: HardwareBreakpoint
-    - 16: HardwareBreakpoint2
-    - 17: KernelDebugger
-    - 18: NtSystemDebugControl
-  - Tab 3 (19):
-    - 19: POPFTrapFlag
-  - Uncovered / no plugin protection yet (20–35):
-    - 20: DebuggerBreak
-    - 21: int2D
-    - 22: int3
-    - 23: StackSegmentRegister
-    - 24: PrefixHop
-    - 25: RaiseDbgControl
-    - 26: DuplicatedHandles
-    - 27: NtSetLdtEntries
-    - 28: VirtualAlloc_MEM_WRITE_WATCH
-    - 29: SetHandleInformation
-    - 30: ReadOwnMemoryStack
-    - 31: ProcessJob
-    - 32: MemoryBreakpoint
-    - 33: PageExceptionBreakpoint
-    - 34: DBGP
-    - 35: LBR
+    - 7: OutputDebugString
+    - 8: InvalidHandle
+    - 9: OpenProcess
+    - 10: DebugFlags
+    - 11: DebugObjectHandle
+    - 12: NtQueryObject
+    - 13: Window
+  - Tab 2 (14–19):
+    - 14: ParentProcesses
+    - 15: Timing
+    - 16: HardwareBreakpoint
+    - 17: HardwareBreakpoint2
+    - 18: KernelDebugger
+    - 19: NtSystemDebugControl
+  - Tab 3 (20):
+    - 20: POPFTrapFlag
+  - Uncovered / no plugin protection yet (21–36):
+    - 21: DebuggerBreak
+    - 22: int2D
+    - 23: int3
+    - 24: StackSegmentRegister
+    - 25: PrefixHop
+    - 26: RaiseDbgControl
+    - 27: DuplicatedHandles
+    - 28: NtSetLdtEntries
+    - 29: VirtualAlloc_MEM_WRITE_WATCH
+    - 30: SetHandleInformation
+    - 31: ReadOwnMemoryStack
+    - 32: ProcessJob
+    - 33: MemoryBreakpoint
+    - 34: PageExceptionBreakpoint
+    - 35: DBGP
+    - 36: LBR
 
 **__3.__** Able to detect unusual memory writes by other analysis tools like sandboxes.
 

@@ -26,9 +26,8 @@ DebugCheckResult debuggerChecks[] = {
     {false, "IsRemoteDebuggerPresent",       .functionPtrWithProcess = IsRemoteDebuggerPresent},
     {false, "DebugPort",                     .functionPtrWithProcess = DebugPort},
 
-    /* OutputDebugString — impl exists in api/outdbgstring.c (CheckOutputDebugString);
-       add include to adbg.h and uncomment:
-       {false, "OutputDebugString",          .functionPtr = CheckOutputDebugString}, */
+    /* OutputDebugString */
+    {false, "OutputDebugString",             .functionPtr = CheckOutputDebugString},
 
     /* NtClose */
     {false, "InvalidHandle",                 .functionPtr = CheckCloseHandle},

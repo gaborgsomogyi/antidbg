@@ -12,6 +12,7 @@
 
 #include "api\dbgpresent.h"
 #include "api\rdbgpresent.h"
+#include "api\outdbgstring.h"
 #include "api\dbgobjhandle.h"
 #include "api\procdbgflag.h"
 #include "api\procdbgport.h"
