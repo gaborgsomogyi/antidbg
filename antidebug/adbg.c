@@ -167,7 +167,9 @@ static void print_usage(void) {
     printf("    Examples:\n");
     printf("      -p 0,1,2,3     checks 0, 1, 2, 3\n");
     printf("      -p 0-2,5-6     checks 0, 1, 2, 5, 6\n");
-    printf("      -p 0,2-5,7     checks 0, 2, 3, 4, 5, 7\n\n");
+    printf("      -p 0,2-5,7     checks 0, 2, 3, 4, 5, 7\n");
+    printf("      -p -5          checks 0 through 5 (open left)\n");
+    printf("      -p 5-          checks 5 through last (open right)\n\n");
     printf("  Available checks:\n");
     for (int i = 0; i < (int)NUM_DEBUG_CHECKS; ++i)
         printf("    %2d  %s\n", i, debuggerChecks[i].functionName);
@@ -191,16 +193,32 @@ static bool parse_protection_spec(const char* spec) {
     while (token != NULL) {
         char* dash = strchr(token, '-');
         if (dash != NULL) {
-            // range: start-end
+            // range: start-end, -end (short for 0-end), start- (short for start to last)
             *dash = '\0';
-            char* endptr1 = NULL;
-            char* endptr2 = NULL;
-            const long start = strtol(token, &endptr1, 10);
-            const long end   = strtol(dash + 1, &endptr2, 10);
-            if (*endptr1 != '\0' || *endptr2 != '\0') {
-                fprintf(stderr, "[-] Non-numeric value in range '%s-%s'\n", token, dash + 1);
-                return false;
+            long start, end;
+
+            if (token[0] == '\0') {
+                start = 0;
+            } else {
+                char* endptr = NULL;
+                start = strtol(token, &endptr, 10);
+                if (*endptr != '\0') {
+                    fprintf(stderr, "[-] Non-numeric value in range '%s-...'\n", token);
+                    return false;
+                }
             }
+
+            if (dash[1] == '\0') {
+                end = (long)NUM_DEBUG_CHECKS - 1;
+            } else {
+                char* endptr = NULL;
+                end = strtol(dash + 1, &endptr, 10);
+                if (*endptr != '\0') {
+                    fprintf(stderr, "[-] Non-numeric value in range '...-%s'\n", dash + 1);
+                    return false;
+                }
+            }
+
             if (start > end) {
                 fprintf(stderr, "[-] Inverted range %ld-%ld\n", start, end);
                 return false;
