@@ -13,42 +13,46 @@ The library is:
 **__1.__** Able to bypass thread creation hooking and hide user-land threads from debuggers.
 
 **__2.__** Able to detect debuggers with 36 different checks (indices usable with `-p`):
-  - 0: IsBeingDebugged
-  - 1: IsRemoteDebuggerPresent
-  - 2: DebuggerBreak
-  - 3: int2D
-  - 4: int3
-  - 5: StackSegmentRegister
-  - 6: PrefixHop
-  - 7: RaiseDbgControl
-  - 8: DebugObjectHandle
-  - 9: KernelDebugger
-  - 10: NtGlobalFlag
-  - 11: DebugFlags
-  - 12: ProcessHeap_Flags
-  - 13: ProcessHeapForce_Flag
-  - 14: DuplicatedHandles
-  - 15: ParentProcesses
-  - 16: NtSetLdtEntries
-  - 17: PEB
-  - 18: DebugPort
-  - 19: HardwareBreakpoint
-  - 20: HardwareBreakpoint2
-  - 21: VirtualAlloc_MEM_WRITE_WATCH
-  - 22: InvalidHandle
-  - 23: NtQueryObject
-  - 24: OpenProcess
-  - 25: SetHandleInformation
-  - 26: NtSystemDebugControl
-  - 27: ReadOwnMemoryStack
-  - 28: ProcessJob
-  - 29: POPFTrapFlag
-  - 30: MemoryBreakpoint
-  - 31: PageExceptionBreakpoint
-  - 32: Timing
-  - 33: Window
-  - 34: DBGP
-  - 35: LBR
+  - Tab 1 (0–12):
+    - 0: IsBeingDebugged
+    - 1: PEB
+    - 2: NtGlobalFlag
+    - 3: ProcessHeap_Flags
+    - 4: ProcessHeapForce_Flag
+    - 5: IsRemoteDebuggerPresent
+    - 6: DebugPort
+    - 7: InvalidHandle
+    - 8: OpenProcess
+    - 9: DebugFlags
+    - 10: DebugObjectHandle
+    - 11: NtQueryObject
+    - 12: Window
+  - Tab 2 (13–18):
+    - 13: ParentProcesses
+    - 14: Timing
+    - 15: HardwareBreakpoint
+    - 16: HardwareBreakpoint2
+    - 17: KernelDebugger
+    - 18: NtSystemDebugControl
+  - Tab 3 (19):
+    - 19: POPFTrapFlag
+  - Uncovered / no plugin protection yet (20–35):
+    - 20: DebuggerBreak
+    - 21: int2D
+    - 22: int3
+    - 23: StackSegmentRegister
+    - 24: PrefixHop
+    - 25: RaiseDbgControl
+    - 26: DuplicatedHandles
+    - 27: NtSetLdtEntries
+    - 28: VirtualAlloc_MEM_WRITE_WATCH
+    - 29: SetHandleInformation
+    - 30: ReadOwnMemoryStack
+    - 31: ProcessJob
+    - 32: MemoryBreakpoint
+    - 33: PageExceptionBreakpoint
+    - 34: DBGP
+    - 35: LBR
 
 **__3.__** Able to detect unusual memory writes by other analysis tools like sandboxes.
 

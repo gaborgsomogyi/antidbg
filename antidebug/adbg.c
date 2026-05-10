@@ -4,42 +4,143 @@
 #include <stdio.h>
 
 DebugCheckResult debuggerChecks[] = {
-    {false, "IsBeingDebugged", .functionPtr = IsBeingDebugged},
-    {false, "IsRemoteDebuggerPresent", .functionPtrWithProcess = IsRemoteDebuggerPresent},
-    {false, "DebuggerBreak", .functionPtr = DebuggerBreak},
-    {false, "int2D", .functionPtr = int2D},
-    {false, "int3", .functionPtr = int3},
-    {false, "StackSegmentRegister", .functionPtrWithThread = StackSegmentRegister},
-    {false, "PrefixHop", .functionPtr = PrefixHop},
-    {false, "RaiseDbgControl", .functionPtr = RaiseDbgControl},
-    {false, "DebugObjectHandle", .functionPtrWithProcess = DebugObjectHandle},
-    {false, "KernelDebugger", .functionPtr = KernelDebugger},
-    {false, "NtGlobalFlag", .functionPtr = NtGlobalFlag},
-    {false, "DebugFlags", .functionPtrWithProcess = DebugFlags},
-    {false, "ProcessHeap_Flags", .functionPtr = ProcessHeapFlag},
-    {false, "ProcessHeapForce_Flag", .functionPtr = ProcessHeapForceFlag},
-    {false, "DuplicatedHandles", .functionPtrWithProcess = DuplicatedHandles},
-    {false, "ParentProcesses", .functionPtrWithProcess = ParentProcesses},
-    {false, "NtSetLdtEntries", .functionPtr = CheckNtSetLdtEntries},
-    {false, "PEB", .functionPtr = CheckPEB},
-    {false, "DebugPort", .functionPtrWithProcess = DebugPort},
-    {false, "HardwareBreakpoint", .functionPtrWithThread = HardwareBreakpoint},
-    {false, "HardwareBreakpoint2", .functionPtrWithProcessAndThread = HardwareBreakPoint2},
-    {false, "VirtualAlloc_MEM_WRITE_WATCH", .functionPtr = WriteWatch},
-    {false, "InvalidHandle", .functionPtr = CheckCloseHandle},
-    {false, "NtQueryObject", .functionPtr = CheckNtQueryObject},
-    {false, "OpenProcess", .functionPtr = CheckOpenProcess},
-    {false, "SetHandleInformation", .functionPtr = ProtectedHandle},
-    {false, "NtSystemDebugControl", .functionPtr = NtSystemDebugControl},
-    {false, "ReadOwnMemoryStack", .functionPtr = ReadMemoryStack},
-    {false, "ProcessJob", .functionPtr = ProcessJob},
-    {false, "POPFTrapFlag", .functionPtr = POPFTrapFlag},
-    {false, "MemoryBreakpoint", .functionPtrWithProcess = MemoryBreakpoint},
-    {false, "PageExceptionBreakpoint", .functionPtrWithProcess = PageExceptionBreakpoint},
-    {false, "Timing", .functionPtr = TimingAttacks},
-    {false, "Window", .functionPtr = CheckWindow},
-    {false, "DBGP", .functionPtr = dbgp},
-    {false, "LBR", .functionPtr = lbr }
+
+    /* =====================================================================
+     * TAB 1 — Anti-Debug 1
+     * ===================================================================== */
+
+    /* IsDebuggerPresent */
+    {false, "IsBeingDebugged",               .functionPtr = IsBeingDebugged},
+    {false, "PEB",                           .functionPtr = CheckPEB},
+
+    /* NtGlobalFlag */
+    {false, "NtGlobalFlag",                  .functionPtr = NtGlobalFlag},
+
+    /* HeapFlags */
+    {false, "ProcessHeap_Flags",             .functionPtr = ProcessHeapFlag},
+
+    /* HeapForceFlags */
+    {false, "ProcessHeapForce_Flag",         .functionPtr = ProcessHeapForceFlag},
+
+    /* CheckRemoteDebuggerPresent */
+    {false, "IsRemoteDebuggerPresent",       .functionPtrWithProcess = IsRemoteDebuggerPresent},
+    {false, "DebugPort",                     .functionPtrWithProcess = DebugPort},
+
+    /* OutputDebugString — impl exists in api/outdbgstring.c (CheckOutputDebugString);
+       add include to adbg.h and uncomment:
+       {false, "OutputDebugString",          .functionPtr = CheckOutputDebugString}, */
+
+    /* NtClose */
+    {false, "InvalidHandle",                 .functionPtr = CheckCloseHandle},
+
+    /* SeDebugPrivilege */
+    {false, "OpenProcess",                   .functionPtr = CheckOpenProcess},
+
+    /* BlockInput — no test yet
+       {false, "BlockInput",                 .functionPtr = CheckBlockInput},         new: api/blockinput.c */
+
+    /* ProcessDebugFlags */
+    {false, "DebugFlags",                    .functionPtrWithProcess = DebugFlags},
+
+    /* ProcessDebugObjectHandle */
+    {false, "DebugObjectHandle",             .functionPtrWithProcess = DebugObjectHandle},
+
+    /* TerminateProcess — no test yet
+       {false, "TerminateProcess",           .functionPtr = CheckTerminateProcess},   new: api/terminateproc.c */
+
+    /* NtSetInformationThread (ThreadHideFromDebugger) — no test yet
+       {false, "NtSetInformationThread",     .functionPtr = CheckSetInfoThread},      new: api/setinfthread.c */
+
+    /* NtQueryObject */
+    {false, "NtQueryObject",                 .functionPtr = CheckNtQueryObject},
+
+    /* FindWindow */
+    {false, "Window",                        .functionPtr = CheckWindow},
+
+    /* NtOpenProcess (block opening current process) — no test yet
+       {false, "NtOpenProcess",              .functionPtr = CheckNtOpenProcess},      new: object/ntopnproc.c */
+
+    /* =====================================================================
+     * TAB 2 — Anti-Debug 2
+     * ===================================================================== */
+
+    /* Process32First — no test yet
+       {false, "Process32First",             .functionPtr = CheckProcess32First},     new: flags/proc32.c */
+
+    /* Process32Next — no test yet (share impl with Process32First)
+       {false, "Process32Next",              .functionPtr = CheckProcess32Next},      new: flags/proc32.c */
+
+    /* ParentProcess */
+    {false, "ParentProcesses",               .functionPtrWithProcess = ParentProcesses},
+
+    /* GetTickCount — TimingAttacks uses GetTickCount64 and QueryPerformanceCounter */
+    {false, "Timing",                        .functionPtr = TimingAttacks},
+
+    /* TimeGetTime — no dedicated test; TimingAttacks does not call timeGetTime
+       {false, "TimeGetTime",                .functionPtr = CheckTimeGetTime},        new: flags/timegtime.c */
+
+    /* QueryPerformanceCounter — covered by Timing above (calls QueryPerformanceCounter directly) */
+
+    /* ZwGetContextThread */
+    {false, "HardwareBreakpoint",            .functionPtrWithThread = HardwareBreakpoint},
+    {false, "HardwareBreakpoint2",           .functionPtrWithProcessAndThread = HardwareBreakPoint2},
+
+    /* NtSetContextThread — no test yet
+       {false, "NtSetContextThread",         .functionPtr = CheckNtSetContextThread}, new: asm/setctxthread.c */
+
+    /* KdDebuggerNotPresent */
+    {false, "KernelDebugger",               .functionPtr = KernelDebugger},
+
+    /* KdDebuggerEnabled — covered by KernelDebugger above (checks both flags) */
+
+    /* NtSetDebugFilterState — no test yet
+       {false, "NtSetDebugFilterState",      .functionPtr = CheckDbgFilterState},    new: api/dbgfilterstate.c */
+
+    /* ProtectDRX — no test yet
+       {false, "ProtectDRX",                 .functionPtrWithThread = CheckProtectDRX}, new: memory/protectdrx.c */
+
+    /* HideDRX — no test yet (HardwareBreakpoint checks GetContextThread path only;
+       HideDRX operates via KiUserExceptionDispatcher exception context)
+       {false, "HideDRX",                    .functionPtrWithThread = CheckHideDRX}, new: memory/hidedrx.c */
+
+    /* DbgPrompt — no test yet (DBGP checks ACPI firmware tables, unrelated)
+       {false, "DbgPrompt",                  .functionPtr = CheckDbgPrompt},          new: memory/dbgprompt.c */
+
+    /* CreateThread — no test yet
+       {false, "CreateThread",               .functionPtr = CheckCreateThread},       new: api/createthread.c */
+
+    /* NtSystemDebugControl */
+    {false, "NtSystemDebugControl",          .functionPtr = NtSystemDebugControl},
+
+    /* =====================================================================
+     * TAB 3 — Anti-Debug 3
+     * ===================================================================== */
+
+    /* RtlRaiseException — POPFTrapFlag raises EXCEPTION_SINGLE_STEP (0x80000004)
+       via RaiseException->RtlRaiseException; plugin hook suppresses that exact code */
+    {false, "POPFTrapFlag",                  .functionPtr = POPFTrapFlag},
+
+    /* Apply Custom Patches — INI-driven; no generic test possible */
+
+    /* =====================================================================
+     * Uncovered — antidbg checks with no corresponding plugin protection
+     * ===================================================================== */
+    {false, "DebuggerBreak",                 .functionPtr = DebuggerBreak},
+    {false, "int2D",                         .functionPtr = int2D},
+    {false, "int3",                          .functionPtr = int3},
+    {false, "StackSegmentRegister",          .functionPtrWithThread = StackSegmentRegister},
+    {false, "PrefixHop",                     .functionPtr = PrefixHop},
+    {false, "RaiseDbgControl",               .functionPtr = RaiseDbgControl},
+    {false, "DuplicatedHandles",             .functionPtrWithProcess = DuplicatedHandles},
+    {false, "NtSetLdtEntries",              .functionPtr = CheckNtSetLdtEntries},
+    {false, "VirtualAlloc_MEM_WRITE_WATCH",  .functionPtr = WriteWatch},
+    {false, "SetHandleInformation",          .functionPtr = ProtectedHandle},
+    {false, "ReadOwnMemoryStack",            .functionPtr = ReadMemoryStack},
+    {false, "ProcessJob",                    .functionPtr = ProcessJob},
+    {false, "MemoryBreakpoint",             .functionPtrWithProcess = MemoryBreakpoint},
+    {false, "PageExceptionBreakpoint",       .functionPtrWithProcess = PageExceptionBreakpoint},
+    {false, "DBGP",                          .functionPtr = dbgp},
+    {false, "LBR",                           .functionPtr = lbr},
 };
 
 #define NUM_DEBUG_CHECKS (sizeof(debuggerChecks) / sizeof(debuggerChecks[0]))
@@ -203,6 +304,7 @@ DWORD __stdcall __adbg(LPVOID lpParam) {
 
             DbgNtDelayExecution(FALSE, &delay);
         }
+        dbg_log("[*] Debugger detection end\n");
     }
 
     return 0;
